@@ -29,7 +29,7 @@ The easiest way to install this skill is using **Vercel's `skills` CLI**, which 
 Run this single command in your terminal:
 
 ```bash
-npx skills add https://github.com/rabden/X-twitter-social-manager-skill
+npx skills add rabden/X-twitter-social-manager-skill
 ```
 
 *The CLI will automatically prompt you to choose:*
