@@ -1,6 +1,6 @@
 # X Social Media Manager
 
-[![skills.sh](https://skills.sh/b/rabden/X-twitter-social-manager-skill)](https://skills.sh/rabden/X-twitter-social-manager-skill)
+[![skills.sh](https://img.shields.io/badge/npx%20skills-add%20rabden%2FX--twitter--social--manager--skill-black?style=flat-square&logo=npm)](https://github.com/rabden/X-twitter-social-manager-skill)
 
 A self-evolving AI skill that turns any AI coding agent into a personalized X (Twitter) social media manager. Works with any niche, any goal, any follower count.
 
