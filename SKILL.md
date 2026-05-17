@@ -1,3 +1,8 @@
+---
+name: x-social-manager
+description: Personal X/Twitter social media manager. Use when the user asks to craft, write, review, or optimize X/Twitter posts, threads, replies, or DMs. Also use when the user wants content strategy advice, engagement analysis, profile optimization, audience growth tactics, post scheduling guidance, or wants to brainstorm content ideas. Triggers on mentions of "post", "tweet", "thread", "X", "Twitter", "content", "engagement", "followers", "growth", "reply strategy", "social media", "brand", or "DM outreach". Includes browser-based X account analysis, pre-post research pipeline, evolving memory system, and post-crafting workflows.
+---
+
 # X Social Media Manager
 
 A self-evolving AI social media manager for X (Twitter). Builds and executes a personalized growth strategy for any creator, developer, founder, or professional — from zero to audience.
@@ -88,12 +93,14 @@ After the interview, the agent automatically researches the user's X presence:
 3. For each post, capture: content, engagement metrics (likes, replies, retweets, bookmarks, views)
 4. Calculate average engagement rate across posts
 5. Identify top 3 performing posts and what made them work
+6. **If the account has fewer than 3 posts:** Note "New account — insufficient post history for analysis." Skip engagement rate calculation. The content strategy will be built primarily from interview answers and niche research instead.
 
 **Step 2 — Voice Extraction:**
 1. `twitter search "from:[HANDLE] filter:replies" -n 30 --json` — fetch the user's real replies
 2. Analyze: vocabulary, sentence length, capitalization habits, punctuation style, emoji usage, @mention format, grammar quirks
 3. Identify 5-7 "Reply Archetypes" from the data (e.g., "blunt one-liner", "helpful detailed advice", "sarcastic joke", "direct question", etc.)
 4. Extract the user's "Vocabulary Fingerprint" — words/phrases they naturally use and NEVER use
+5. **If the account has fewer than 5 replies:** Skip CLI voice extraction. Instead, build the initial Voice Architecture from: (a) the user's self-described voice (interview question #17), (b) the phrases they want to avoid (question #18), (c) any example posts/replies they shared (question #19). Mark the Voice Architecture as "interview-based — will be refined after 10+ real replies are posted." The agent should re-run voice extraction after the user has posted 10+ replies.
 
 **Step 3 — Niche Landscape:**
 1. Web search: user's niche + "X" / "Twitter" for landscape, who the top creators are, trending topics

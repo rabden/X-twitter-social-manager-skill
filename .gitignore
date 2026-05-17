@@ -1,0 +1,19 @@
+# Downloaded media (analysis images, screenshots)
+references/media/*.jpg
+references/media/*.png
+references/media/*.gif
+references/media/*.mp4
+references/media/*.webp
+!references/media/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# JSON data exports
+references/*.json

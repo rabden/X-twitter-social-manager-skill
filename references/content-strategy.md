@@ -132,6 +132,20 @@ _[populated during onboarding -- search queries to find leads, opportunities, an
 (Optional: [FOLLOW-UP HOOK -- a question or "I've been experimenting with X"])
 ```
 
+**Good reply example (for a developer niche):**
+```
+The layout is clean but the scroll animation is doing
+too much -- try easing with a cubic-bezier(.22,1,.36,1)
+instead of linear for that premium feel.
+
+I ran into the same thing building a similar component
+last month. Happy to share the config if you want it
+```
+
+This reply: shows expertise (specific technical tip), adds value (actionable fix), includes subtle proof (mentions past experience), and invites follow-up.
+
+_[Agent: Generate 2-3 good reply examples specific to the user's niche during onboarding and add them here.]_
+
 **Bad replies (NEVER DO):**
 - "Great post!"
 - "This is amazing!"
