@@ -22,49 +22,41 @@ On first run, the agent interviews you about your identity, niche, goals, and vo
 
 ## Installation
 
-### OpenCode
+The easiest way to install this skill is using **Vercel's `skills` CLI**, which automatically detects and configures all major coding agents (OpenCode, Claude Code, Cursor, Windsurf, Codex, Gemini CLI, etc.).
 
-Copy the `SKILL.md` and `references/` directory into your project's skill directory:
+### Automatic Installation (Recommended)
 
-```
-your-project/
-  .opencode/
-    skills/
-      x-social-manager/
-        SKILL.md
-        references/
-          ...all reference files...
+Run this single command in your terminal:
+
+```bash
+npx skills add https://github.com/rabden/X-twitter-social-manager-skill
 ```
 
-Or into your global skills directory at `~/.config/opencode/skills/x-social-manager/`.
+*The CLI will automatically prompt you to choose:*
+1. **Scope:** Install globally (available in all workspaces at `~/`) or project-scoped (restricted to the current workspace).
+2. **Agents:** Choose which of your installed coding agents (OpenCode, Claude Code, Cursor, etc.) you want to enable the skill for.
+3. **Method:** Install via **Symlink** (recommended — allows instant git updates) or **Copy**.
 
-### Claude Code
+### Manual Installation (Fallback)
 
-Copy into your project or use as a custom instruction file:
+If you prefer to install manually, copy the `SKILL.md` and `references/` directory into your agent's config folder:
 
-```
-your-project/
-  .claude/
-    skills/
-      x-social-manager/
-        SKILL.md
-        references/
-          ...all reference files...
-```
+*   **OpenCode:** Global (`~/.config/opencode/skills/x-social-manager/`) or Project (`.agents/skills/x-social-manager/`)
+*   **Claude Code:** Global (`~/.claude/skills/x-social-manager/`) or Project (`.claude/skills/x-social-manager/`)
+*   **Cursor / Windsurf / Codex:** Project (`.agents/skills/x-social-manager/`) or Global
 
-Or reference SKILL.md directly as a project instruction.
+Place the `SKILL.md` and `references/` directory in your agent's custom instructions path. The skill is self-contained — it only needs the agent to be able to read/write files, run bash commands, and search the web.
 
-### Cursor / Windsurf / Other Agents
+### Standalone Usage
 
-Place the SKILL.md and references/ directory wherever your agent reads custom instructions from. The skill is self-contained — it only needs the agent to be able to read and write files, run bash commands, and search the web.
+If your agent supports reading markdown files as instructions directly:
 
-### Standalone (Any Agent)
-
-If your agent supports reading markdown files as instructions:
-
-1. Clone this repo into your workspace
-2. Tell your agent: "Read SKILL.md and follow the instructions"
-3. The onboarding flow will handle everything else
+1. Clone this repository into your workspace:
+   ```bash
+   git clone https://github.com/rabden/X-twitter-social-manager-skill.git
+   ```
+2. Tell your agent: `"Read SKILL.md and follow the instructions to set up X Social Media Manager."`
+3. The onboarding flow will handle the rest.
 
 ## File Structure
 
