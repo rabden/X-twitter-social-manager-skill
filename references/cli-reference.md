@@ -2,6 +2,10 @@
 
 All operations use the `twitter` command (installed via `uv tool install twitter-cli`). Do not hallucinate flags -- use only what is documented here.
 
+If the session selects Hermes Tweet instead of `twitter-cli`, read
+[hermes-tweet-backend.md](hermes-tweet-backend.md) and use its command mapping.
+Keep this file as the source of truth for `twitter-cli` only.
+
 ## CLI Safety Rules (READ BEFORE EVERY COMMAND)
 
 These rules prevent the most common agent tool-call failures:
@@ -30,6 +34,21 @@ These rules prevent the most common agent tool-call failures:
 | Media upload failed | Verify file path, format (.jpg/.png/.gif only for images), and file size (<15MB). |
 | Rate limit | Wait 15 minutes. Reduce fetch volume. |
 | Empty response | Check if `--json` flag is present. Try without `--filter`. |
+
+## Backend Selection
+
+Default to `twitter-cli` when browser-cookie auth is already working. Use
+Hermes Tweet when:
+
+- the host agent exposes the `hermes-tweet` toolset
+- the user asks for Hermes Agent integration
+- the workflow needs structured tweet search, tweet replies, user lookup,
+  monitors, follower export, or action auditability
+- `twitter-cli` is unavailable but Hermes Tweet read tools are ready
+
+Do not mix write backends in a single action. If a post starts with
+`twitter-cli`, do not retry the same write through Hermes Tweet after a policy,
+auth, or account-state error. Stop and ask the user.
 
 ### NEVER Do
 - Invent flags not listed in this document
@@ -123,3 +142,17 @@ twitter search "hiring" "your skill" -t Latest -n 15 --json
 - Up to 4 images per post/reply/quote
 - Videos are attached via the same `--image` flag (MP4 format)
 - Media paths must be absolute or relative to current directory
+
+## Hermes Tweet Companion Reference
+
+Hermes Tweet is a Hermes Agent plugin for X/Twitter automation through Xquik.
+It provides:
+
+- `tweet_explore` for endpoint discovery
+- `tweet_read` for read-only endpoints
+- `tweet_action` for approval-gated writes, private reads, monitors, exports,
+  media jobs, and other actions
+
+See [hermes-tweet-backend.md](hermes-tweet-backend.md) for installation,
+status tracking, command mapping, posting, replies, DMs, monitoring, and
+failure handling.
