@@ -43,6 +43,8 @@ Before finalizing ANY reply, the agent MUST read [voice-anti-patterns.md](voice-
 ## Environment Status
 
 - **twitter-cli:** _[set during prerequisites check]_
+- **X backend:** _[twitter-cli / Hermes Tweet / manual]_
+- **Hermes Tweet:** _[unavailable / explore-only / read-ready / actions-ready]_
 - **Sub-agents:** _[set during sub-agent setup]_
 - **Auth method:** _[set during prerequisites check]_
 - **Last verified:** _[set during prerequisites check]_

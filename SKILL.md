@@ -6,7 +6,7 @@ authors:
   - rabden
 repository: https://github.com/rabden/X-twitter-social-manager-skill
 metadata:
-  openclaw: '{"requires":{"env":["TWITTER_AUTH_TOKEN","TWITTER_CT0"],"bins":["twitter","uv"]},"primaryEnv":"TWITTER_AUTH_TOKEN"}'
+  openclaw: '{"requires":{"env":["TWITTER_AUTH_TOKEN","TWITTER_CT0"],"bins":["twitter","uv"]},"optional":{"env":["XQUIK_API_KEY","HERMES_TWEET_ENABLE_ACTIONS"],"toolsets":["hermes-tweet"]},"primaryEnv":"TWITTER_AUTH_TOKEN"}'
 ---
 
 # X Social Media Manager
@@ -23,12 +23,18 @@ A self-evolving AI social media manager for X (Twitter). Builds and executes a p
 4. **No external links in main post** — Links kill reach 30-50%. Always put links in the first reply.
 5. **Every post must drive replies** — End with a question, hot take, or "what would you do?"
 6. **Vector consistency** — Every post reinforces the user's niche positioning. No off-topic content.
-7. **Direct posting** — The agent CAN post directly via `twitter post`. Always present final text + char count to user and get explicit approval ("go ahead", "post it", "yes") before executing.
+7. **Direct posting** — The agent CAN post directly via `twitter post` or an approved Hermes Tweet `tweet_action` backend. Always present final text + char count to user and get explicit approval ("go ahead", "post it", "yes") before executing.
 8. **Update memory after every session** — Append to [memory.md](references/memory.md). Never delete old entries.
 
 ## Prerequisites (Auto-Setup)
 
-The agent MUST verify twitter-cli is available before any session. Check the `Environment Status` section in [memory.md](references/memory.md) first — if it shows `twitter-cli: installed`, skip to Onboarding Check.
+The agent MUST verify an X backend before any session. Check the `Environment Status` section in [memory.md](references/memory.md) first. Default to `twitter-cli`; use Hermes Tweet only when the host agent exposes the Hermes Tweet toolset or the user asks for the Hermes-native route.
+
+### Backend Priority
+
+1. **twitter-cli** - default local backend for browser-cookie sessions.
+2. **Hermes Tweet** - optional structured backend for tweet search, user lookup, reply/thread reads, monitors, exports, and approval-gated actions. Read [hermes-tweet-backend.md](references/hermes-tweet-backend.md) before using it.
+3. **Manual package** - fallback when neither backend can post safely.
 
 ### Check & Install twitter-cli
 
@@ -42,7 +48,17 @@ The agent MUST verify twitter-cli is available before any session. Check the `En
    - If authenticated -> update memory.md Environment Status to `twitter-cli: installed`
    - If NOT authenticated -> tell user: "twitter-cli is installed but not authenticated. Please log into x.com in your browser (Chrome/Firefox/Edge/Brave/Arc) and try again."
    - Alternative auth: user can set environment variables `TWITTER_AUTH_TOKEN` and `TWITTER_CT0` manually
-4. Once verified, proceed to Onboarding Check
+4. Once verified, set `X backend: twitter-cli` in memory.md and proceed to Onboarding Check
+
+### Check Hermes Tweet Backend (Optional)
+
+Use this route only if Hermes Tweet tools are available or the user asks to use Hermes Agent:
+
+1. Confirm `tweet_explore` is available.
+2. If only `tweet_explore` is available, set `Hermes Tweet: explore-only`.
+3. If `tweet_read` can call a safe account/status endpoint, set `Hermes Tweet: read-ready`.
+4. If `tweet_action` is available and the user wants posting, replies, DMs, follows, likes, retweets, monitors, or exports, remind them actions require `HERMES_TWEET_ENABLE_ACTIONS=true` and explicit approval for each action.
+5. Never ask the user to paste `XQUIK_API_KEY` into chat. Ask them to configure it in the Hermes runtime environment or `~/.hermes/.env`.
 
 ## First-Run Onboarding (Run ONCE — then never again)
 
@@ -94,15 +110,15 @@ Ask these questions conversationally — not as a form. Group related questions 
 After the interview, the agent automatically researches the user's X presence:
 
 **Step 1 — Account Analysis:**
-1. `twitter user [HANDLE] --json` — fetch profile data (followers, following, tweet count, bio, join date)
-2. `twitter user-posts [HANDLE] --max 20 -c --json` — fetch recent posts
+1. `twitter user [HANDLE] --json` or Hermes Tweet user lookup — fetch profile data (followers, following, tweet count, bio, join date)
+2. `twitter user-posts [HANDLE] --max 20 -c --json` or Hermes Tweet user tweets — fetch recent posts
 3. For each post, capture: content, engagement metrics (likes, replies, retweets, bookmarks, views)
 4. Calculate average engagement rate across posts
 5. Identify top 3 performing posts and what made them work
 6. **If the account has fewer than 3 posts:** Note "New account — insufficient post history for analysis." Skip engagement rate calculation. The content strategy will be built primarily from interview answers and niche research instead.
 
 **Step 2 — Voice Extraction:**
-1. `twitter search "from:[HANDLE] filter:replies" -n 30 --json` — fetch the user's real replies
+1. `twitter search "from:[HANDLE] filter:replies" -n 30 --json` or Hermes Tweet tweet search — fetch the user's real replies
 2. Analyze: vocabulary, sentence length, capitalization habits, punctuation style, emoji usage, @mention format, grammar quirks
 3. Identify 5-7 "Reply Archetypes" from the data (e.g., "blunt one-liner", "helpful detailed advice", "sarcastic joke", "direct question", etc.)
 4. Extract the user's "Vocabulary Fingerprint" — words/phrases they naturally use and NEVER use
@@ -110,13 +126,13 @@ After the interview, the agent automatically researches the user's X presence:
 
 **Step 3 — Niche Landscape:**
 1. Web search: user's niche + "X" / "Twitter" for landscape, who the top creators are, trending topics
-2. `twitter search "[niche topic]" -t Top --max 20 -c --json` — find the top voices in the niche
+2. `twitter search "[niche topic]" -t Top --max 20 -c --json` or Hermes Tweet tweet search — find the top voices in the niche
 3. Identify 5-7 "Tier 1" accounts the user should engage with (high-follower creators in the same niche)
 4. Identify 3-5 "Tier 2" accounts (the user's target audience — potential clients, employers, or community members)
 5. Note trending hashtags, common post formats, and conversation gaps in the niche
 
 **Step 4 — Competitor Analysis:**
-1. For each Tier 1 account: `twitter user-posts [HANDLE] --max 10 -c --json`
+1. For each Tier 1 account: `twitter user-posts [HANDLE] --max 10 -c --json` or Hermes Tweet user tweets
 2. Extract: hook patterns, post formats, engagement rates, hashtags, content pillars
 3. Identify what's working for competitors that the user could adapt
 
@@ -211,7 +227,7 @@ After creation, verify at least one sub-agent can be invoked (e.g., call x-reply
 > **Gate:** The agent MUST read EVERY file listed below before proceeding to ANY workflow. Skipping files causes strategic gaps and voice mismatch. If context is too large, read in batches — but read ALL of them.
 
 1. Note the current date and time
-2. Verify twitter-cli status (check memory.md Environment Status — if `not installed`, run Prerequisites above)
+2. Verify X backend status (check memory.md Environment Status — if no backend is ready, run Prerequisites above)
 3. Read ALL of the following reference files — **no exceptions, no skipping**:
    - [user-profile.md](references/user-profile.md) — identity, stack, goals, constraints, voice
    - [memory.md](references/memory.md) — past performance data, voice architecture, lessons, environment status
@@ -224,20 +240,21 @@ After creation, verify at least one sub-agent can be invoked (e.g., call x-reply
    - [branding-strategy.md](references/branding-strategy.md) — positioning, competitive gaps, audience profile
    - [content-planner.md](references/content-planner.md) — planned posts queue, scheduling logic
    - [cli-reference.md](references/cli-reference.md) — twitter-cli commands, flags, and **safety rules**
+   - [hermes-tweet-backend.md](references/hermes-tweet-backend.md) — only when Hermes Tweet is selected or available
 
 ### Step 2: X Account Catchup
 
-Use twitter-cli to fetch account stats and recent posts.
+Use the selected X backend to fetch account stats and recent posts.
 
-1. Run `twitter user [HANDLE] --json` -> update Growth Milestones in memory
-2. Run `twitter user-posts [HANDLE] --max 15 -c --json` -> fetch recent posts
+1. Run `twitter user [HANDLE] --json` or Hermes Tweet user lookup -> update Growth Milestones in memory
+2. Run `twitter user-posts [HANDLE] --max 15 -c --json` or Hermes Tweet user tweets -> fetch recent posts
 3. For each post from the **last 5 days**, capture: content type, hook used, engagement metrics (likes, replies, retweets, bookmarks, views)
 4. Update [memory.md](references/memory.md) Post Performance Log with fresh data
 5. Identify patterns: which hooks worked, which formats flopped, what time slots performed best
 
 ### Step 3: Voice Pattern Sync (On Demand / First Session)
 
-If the Voice & Reply Architecture in `memory.md` is empty or stale (>2 weeks old), run `twitter search "from:[HANDLE] filter:replies" -n 20 --json` to refresh the user's natural conversational tone. Update the Voice & Reply Architecture section in memory.
+If the Voice & Reply Architecture in `memory.md` is empty or stale (>2 weeks old), run `twitter search "from:[HANDLE] filter:replies" -n 20 --json` or Hermes Tweet tweet search to refresh the user's natural conversational tone. Update the Voice & Reply Architecture section in memory.
 
 ### Step 4: Report
 
@@ -281,10 +298,10 @@ When the user wants to create a post (shows a video, screenshot, idea, or says "
 Search topic + relevant niche keywords for landscape, demand signals, and trending news to hook into.
 
 **Step 2 -- X Research (CLI):**
-1. `twitter search "topic" -t Latest --max 20 -c --json` — who's posting, what's getting engagement
+1. `twitter search "topic" -t Latest --max 20 -c --json` or Hermes Tweet tweet search — who's posting, what's getting engagement
 2. Identify the **conversation gap** — what hasn't been said yet?
 3. Note trending hashtags, phrases, or debates
-4. `twitter search "topic" --from [target_account] --json` — check at least 1 Tier 1 account
+4. `twitter search "topic" --from [target_account] --json` or Hermes Tweet user/tweet search — check at least 1 Tier 1 account
 
 **Step 3 -- Image Analysis (MANDATORY when media exists):**
 > If the user shares an image or the topic involves a visual, the agent MUST download and analyze it before drafting.
@@ -374,9 +391,11 @@ After user picks a variation:
    - Verify character count is <=280
    - If using `--image`, verify file exists: `ls -la /path/to/media`
    - Escape any `"` in post text with `\"`
-3. Execute: `twitter post "Final text" --json` (or with `--image /path/to/media.jpg`)
+3. Execute with the selected backend:
+   - twitter-cli: `twitter post "Final text" --json` (or with `--image /path/to/media.jpg`)
+   - Hermes Tweet: follow [hermes-tweet-backend.md](references/hermes-tweet-backend.md) Posting Flow and use `tweet_action`
 4. Capture returned tweet ID from JSON output
-5. If first reply exists: `twitter reply [tweet_id] "Reply text" --json`
+5. If first reply exists: use `twitter reply [tweet_id] "Reply text" --json` or Hermes Tweet reply action after approval
 6. Log to memory.md with timestamp and tweet ID
 7. Start golden window countdown
 
@@ -387,7 +406,7 @@ When the user shares someone else's post and wants to reply:
 > **Gate -- IMAGE CHECK:** Before writing ANY reply, check if the original post has images.
 
 **Step 1 -- Fetch & Analyze the Post:**
-1. `twitter tweet [tweet_id] --json` — get full post data including media URLs
+1. `twitter tweet [tweet_id] --json` or Hermes Tweet tweet details/thread/replies — get full post data including media URLs
 2. **If post has images:**
    - Download EVERY image: `curl -o "./references/media/reply_img_1.jpg" "[image_url]"`
    - Verify download: `ls -la ./references/media/reply_img_1.jpg`
@@ -420,7 +439,7 @@ Present 2-3 options with:
 - Why this reply adds value
 
 **Step 5 -- Post on Approval:**
-On explicit approval, execute: `twitter reply [tweet_id] "text" --json`
+On explicit approval, execute with the selected backend: `twitter reply [tweet_id] "text" --json` or Hermes Tweet reply action.
 
 ### 3. Write a Thread
 
@@ -433,7 +452,7 @@ When the user wants a multi-tweet thread:
    - **Final tweet:** Takeaway + CTA + question `[N/280]`
 3. Each tweet must work if screenshotted individually
 4. Mark boundaries: `[Tweet 1/N]`, `[Tweet 2/N]`
-5. On approval, post sequentially: `twitter post` -> capture ID -> `twitter reply [id]` for each subsequent tweet
+5. On approval, post sequentially with the selected backend: `twitter post` -> capture ID -> `twitter reply [id]`, or Hermes Tweet post/reply actions
 
 ### 4. Engagement Session Guide
 
@@ -443,12 +462,12 @@ When the user says they're doing daily engagement, or asks to "read my feed and 
 
 **Step 1 -- Fetch Candidates:**
 1. Remind of time structure: 30 min replies -> 30 min own content -> 30 min follow-up
-2. `twitter feed --json -n 20 --filter` — find high-engagement posts
-3. `twitter search "niche topic" --filter -c --json` — discover prospects
+2. `twitter feed --json -n 20 --filter` or Hermes Tweet timeline/search endpoints — find high-engagement posts
+3. `twitter search "niche topic" --filter -c --json` or Hermes Tweet tweet search — discover prospects
 
 **Step 2 -- Select & Analyze (for each candidate post):**
 1. Evaluate: Is this post worth replying to? (High engagement, relevant niche, Tier 1 account)
-2. **Image Check:** `twitter tweet [id] --json` — check for media URLs
+2. **Image Check:** `twitter tweet [id] --json` or Hermes Tweet tweet details — check for media URLs
    - If images exist -> download to `./references/media/` and analyze
    - If video -> note "Video post, text-context only"
    - If text-only -> note "Text-only"
@@ -468,7 +487,7 @@ REPLY CARD
 ```
 
 **Step 4 -- Wait for Approval:**
-- User approves -> execute `twitter reply [id] "text" --json`
+- User approves -> execute `twitter reply [id] "text" --json` or Hermes Tweet reply action
 - User rejects -> skip or redraft
 - User edits -> use their edited version
 - **NEVER post a reply without explicit approval on that specific reply**
@@ -481,7 +500,7 @@ Log engaged accounts and reply IDs in memory.md
 When the user wants to plan content ahead, or proactively after catchup:
 
 Execute the full pipeline from [content-planner.md](references/content-planner.md):
-1. **Feed Scan** — `twitter feed --json -n 30 --filter`
+1. **Feed Scan** — `twitter feed --json -n 30 --filter` or Hermes Tweet timeline/search route
 2. **Competitor Analysis** — fetch posts from Tier 1 accounts, update Competitor Watchlist in memory
 3. **Trend Research** — search niche topics for conversation gaps
 4. **Reply Opportunities** — draft replies for high-value posts found
@@ -496,7 +515,7 @@ When the user shares a post URL/ID for analysis, or during research:
 > If a post contains images, the agent MUST download and analyze them.
 
 **Image Analysis Pipeline:**
-1. `twitter tweet [tweet_id] --json` — get post data with media URLs
+1. `twitter tweet [tweet_id] --json` or Hermes Tweet tweet details — get post data with media URLs
 2. Check the `media` array in the JSON response
 3. For each image URL found:
    - `curl -o "./references/media/analysis_img_N.jpg" "[image_url]"` — download
@@ -516,7 +535,7 @@ When the user asks for strategy advice:
 ### 8. DM Outreach
 
 When the user identifies a potential client or connection:
-1. Research: `twitter user [handle] --json` and `twitter user-posts [handle] --max 5 -c --json`
+1. Research: `twitter user [handle] --json` and `twitter user-posts [handle] --max 5 -c --json`, or Hermes Tweet user lookup/user tweets
 2. Write using warm DM framework from [content-strategy.md](references/content-strategy.md)
 3. Keep under 4 sentences — specific, generous, peer-positioned
 
@@ -525,7 +544,7 @@ When the user identifies a potential client or connection:
 Run this workflow at the **end of every session** and as a deep-dive whenever the user asks for strategy review. This is what makes the skill self-sustaining — it upgrades its own strategy files based on real data.
 
 #### Phase 1: Performance Analysis (What's working for US)
-1. `twitter user-posts [HANDLE] --max 20 -c --json` — pull recent posts
+1. `twitter user-posts [HANDLE] --max 20 -c --json` or Hermes Tweet user tweets — pull recent posts
 2. For each post, calculate engagement rate: `(likes + replies + retweets + bookmarks) / views x 100`
 3. Rank posts by engagement rate and identify:
    - **Top 3 performers**: what hook type, post type, time slot, hashtags, media type?
@@ -534,8 +553,8 @@ Run this workflow at the **end of every session** and as a deep-dive whenever th
 5. Update Post Performance Log in [memory.md](references/memory.md)
 
 #### Phase 2: Feed Intelligence (What's working for OTHERS)
-1. `twitter feed --json -n 40 --filter` — scan algorithmic feed
-2. `twitter user-posts [tier1_account] --max 10 -c --json` — for each competitor
+1. `twitter feed --json -n 40 --filter` or Hermes Tweet timeline/search route — scan algorithmic feed
+2. `twitter user-posts [tier1_account] --max 10 -c --json` or Hermes Tweet user tweets — for each competitor
 3. Identify the **top 5 highest-engagement posts** across the feed and competitors
 4. For each top post, extract:
    - Hook pattern used (map to hook library categories)
@@ -549,15 +568,15 @@ Run this workflow at the **end of every session** and as a deep-dive whenever th
 
 #### Phase 3: Audience Profiling (Who are WE reaching)
 1. Review replies and likes on recent posts -> `twitter tweet [post_id] --json -n 20` for each recent post
-2. For each account that engaged, check: `twitter user [handle] --json`
+2. For each account that engaged, check: `twitter user [handle] --json` or Hermes Tweet user lookup
 3. Categorize engagers into **Audience Segments** relevant to the user's niche
 4. Update **Audience Intelligence** section in memory.md with segment breakdown
 5. Identify which content types attract which segments -> refine content calendar
 
 #### Phase 4: Potential Follower Analysis (Who SHOULD we target)
-1. `twitter followers [tier1_competitor] --json` — sample followers of similar accounts
+1. `twitter followers [tier1_competitor] --json` or Hermes Tweet follower export — sample followers of similar accounts
 2. For a sample of those followers, check what they engage with:
-   - `twitter likes [handle] --json` — what content do they like?
+   - `twitter likes [handle] --json` or Hermes Tweet liked tweets — what content do they like?
    - What accounts do they follow?
 3. Identify the **Ideal Follower Profile**
 4. Update **Target Audience Profile** in [content-strategy.md](references/content-strategy.md)
@@ -644,10 +663,20 @@ The specific calendar is generated during onboarding and stored in [content-plan
 5. **Error recovery:** If a command fails, read the error. Common fixes: `twitter status` to re-auth, check flag spelling.
 6. **Never hallucinate flags:** Only use flags documented in cli-reference.md. When in doubt: `twitter [command] --help`.
 
+## Hermes Tweet Safety Rules
+
+> **MANDATORY:** Read [hermes-tweet-backend.md](references/hermes-tweet-backend.md) before using Hermes Tweet.
+
+1. Use `tweet_explore` before `tweet_read` or `tweet_action`.
+2. Never guess endpoint paths or payload fields.
+3. Use `tweet_read` only for catalog-listed read-only endpoints.
+4. Use `tweet_action` only after showing the exact action and receiving approval.
+5. Stop on auth, policy, account-state, or rate-limit errors. Do not retry through another write backend.
+
 ## Primary Strategy Reference
 
 The [branding-strategy.md](references/branding-strategy.md) is the ULTIMATE reference document. Re-read it before every content planning session.
 
 ## CLI Reference
 
-For all twitter-cli commands, flags, and usage examples, see [cli-reference.md](references/cli-reference.md).
+For all twitter-cli commands, flags, and usage examples, see [cli-reference.md](references/cli-reference.md). For the optional Hermes Agent backend, see [hermes-tweet-backend.md](references/hermes-tweet-backend.md).

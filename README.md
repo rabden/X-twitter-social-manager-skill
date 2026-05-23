@@ -21,6 +21,7 @@ On first run, the agent interviews you about your identity, niche, goals, and vo
 - An AI agent that supports skills/instructions (see Installation below)
 - `twitter-cli` — installed automatically on first run via `uv tool install twitter-cli`
 - An active X (Twitter) session in your browser (for cookie-based auth)
+- Optional: [Hermes Tweet](https://github.com/Xquik-dev/hermes-tweet#readme) in Hermes Agent for structured X search, reply/thread reads, monitors, follower export, and approval-gated actions
 
 ## Installation
 
@@ -77,6 +78,7 @@ x-social-manager/
     branding-strategy.md                # Positioning analysis, competitive gaps, lead funnel
     content-planner.md                  # Post queue, scheduling logic
     cli-reference.md                    # twitter-cli commands, flags, safety rules
+    hermes-tweet-backend.md             # Optional Hermes Tweet backend adapter
     subagent-definitions.md             # System prompts for 4 specialized sub-agents
     media/                              # Downloaded images for analysis (gitignored)
 ```
@@ -130,6 +132,23 @@ If sub-agents aren't supported, the main agent handles everything directly — n
 - **Approval-gated** — The agent never posts without explicit user approval.
 - **Self-evolving** — The Intelligence Update workflow re-ranks hooks, updates strategy, and profiles your audience based on real performance data.
 - **Algorithm-aware** — All strategies are built on the X Phoenix algorithm's actual ranking signals (Author-Engaged Reply > Bookmark > Like).
+- **Backend-flexible** — Uses `twitter-cli` by default, with an optional Hermes Tweet backend for structured reads, monitors, exports, and audited actions.
+
+## Optional Hermes Tweet Backend
+
+The default backend remains `twitter-cli`. If you already run Hermes Agent, you
+can enable Hermes Tweet as a structured X/Twitter backend:
+
+```bash
+hermes plugins install Xquik-dev/hermes-tweet --enable
+hermes tools list
+```
+
+Use it for tweet search, tweet details, replies, quotes, threads, user lookup,
+follower export, monitoring, and approval-gated tweet/reply/DM actions. API keys
+belong in the Hermes runtime environment or `~/.hermes/.env`, not in chat.
+Action tools stay gated by `HERMES_TWEET_ENABLE_ACTIONS=true` and the skill's
+existing approval step.
 
 ## License
 
